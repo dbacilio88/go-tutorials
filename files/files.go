@@ -3,7 +3,7 @@ package files
 import (
 	"bufio"
 	"fmt"
-	"github.com/go/bucles"
+	"github.com/dbacilio88/go/bucles"
 	"os"
 	"time"
 )

@@ -2,8 +2,8 @@ package app
 
 import (
 	"fmt"
-	"github.com/go/interfaces"
-	"github.com/go/structs/model"
+	"github.com/dbacilio88/go/interfaces"
+	"github.com/dbacilio88/go/structs/model"
 )
 
 /**

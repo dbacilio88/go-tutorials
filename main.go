@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/go/server/middleware"
+	"github.com/dbacilio88/go/server/middleware"
 )
 
 func main() {
