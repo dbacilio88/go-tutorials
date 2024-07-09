@@ -16,7 +16,7 @@ func main() {
 	var years float64 = 10
 	investmentAmount = 2000
 
-	scan, err := fmt.Scan("Ingresar datos ")
+	scan, err := fmt.Scan(&investmentAmount)
 	fmt.Println(scan)
 	if err != nil {
 		return

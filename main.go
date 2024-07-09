@@ -1,14 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"github.com/go/vectors/slices"
+)
 
 func main() {
-	fmt.Println("Hello world")
-	rang()
-}
-
-func rang() {
-	for i := 0; i < 20; i++ {
-		fmt.Println(i)
-	}
+	slices.Capacity()
 }
