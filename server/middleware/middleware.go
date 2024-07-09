@@ -25,9 +25,9 @@ import "fmt"
 func Middleware(a, b int) {
 	fmt.Println("Start")
 	defer fmt.Println("End")
-	result := operation(plus)(2, 3)
+	result := operation(plus)(a, b)
 	fmt.Println(result)
-	result = operation(sub)(2, 3)
+	result = operation(sub)(a, b)
 	fmt.Println(result)
 }
 func sub(a, b int) int {
