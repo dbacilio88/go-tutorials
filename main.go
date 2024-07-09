@@ -1,9 +1,11 @@
 package main
 
 import (
-	"github.com/go/structs/app"
+	"github.com/go/server/middleware"
 )
 
 func main() {
-	app.ExecuteInterfaces()
+
+	middleware.Middleware(1, 2)
+
 }
