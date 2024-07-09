@@ -1,9 +1,9 @@
 package main
 
 import (
-	"github.com/go/vectors/slices"
+	"github.com/go/structs/app"
 )
 
 func main() {
-	slices.Capacity()
+	app.ExecuteInterfaces()
 }
