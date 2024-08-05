@@ -1,5 +1,7 @@
 package cmd
 
+import "github.com/dbacilio88/go/pkg/fundamental/server/middleware"
+
 /**
 *
 * main
@@ -19,5 +21,7 @@ package cmd
  */
 
 func main() {
+
+	middleware.Middleware(1, 2)
 
 }
