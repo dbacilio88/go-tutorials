@@ -1,0 +1,19 @@
+services:
+  server-ssh:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: server-ssh
+    restart: always
+    ports:
+      - 2222:22
+    stdin_open: true
+    tty: true
+    networks:
+      - ssh-net
+
+networks:
+  ssh-net:
+    name: ssh-net
+    driver: bridge
+

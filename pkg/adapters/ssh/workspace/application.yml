@@ -1,0 +1,16 @@
+server:
+  host: localhost
+  port: :3000
+ssh:
+  host: localhost
+  password: cbaciliod
+  port: 2222
+  protocol: tcp
+  username: cbaciliod
+  private_key: pkg/adapters/ssh/workspace/docker/keys/id_rsa
+  public_key: pkg/adapters/ssh/workspace/docker/keys/id_rsa.pub
+  known_hosts: pkg/adapters/ssh/workspace/docker/keys/known_hosts
+  enable: false
+
+scheduler:
+  enable: true

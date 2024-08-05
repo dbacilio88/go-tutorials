@@ -3,7 +3,8 @@ package files
 import (
 	"bufio"
 	"fmt"
-	"github.com/dbacilio88/go/bucles"
+	"github.com/dbacilio88/go/pkg/fundamental/bucles"
+
 	"os"
 	"time"
 )
