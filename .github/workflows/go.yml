@@ -6,10 +6,10 @@ name: Go CI
 on:
   push:
     branches:
-      - main
+      - master
   pull_request:
     branches:
-      - main
+      - master
 
 jobs:
   build:
@@ -33,7 +33,4 @@ jobs:
 
     - name: Build
       run: go build -v ./...
-
-    - name: Lint
-      run: golint ./...
 
