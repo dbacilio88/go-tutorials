@@ -54,7 +54,7 @@ func (s *ShhAdapter) Connection() (*client.Client, error) {
 		config.Config.Ssh.Protocol,
 		net.JoinHostPort(config.Config.Ssh.Host, config.Config.Ssh.Port),
 		s.clientConfig(&config.Config.Ssh),
-	)
+	) //Tema familiar urgente
 
 	if err != nil {
 		log.Fatalf("error connecting to server ssh: %v", err)
