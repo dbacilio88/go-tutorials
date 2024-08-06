@@ -1,8 +1,8 @@
 package task
 
 import (
+	"github.com/dbacilio88/go/pkg/adapters/ftp"
 	"github.com/dbacilio88/go/pkg/adapters/ssh"
-	"github.com/dbacilio88/go/pkg/adapters/ssh/ftp"
 	"github.com/madflojo/tasks"
 	client "golang.org/x/crypto/ssh"
 	"log"
@@ -48,7 +48,7 @@ func (s *Scheduler) Create() *tasks.Scheduler {
 func (s *Scheduler) Run(exec *tasks.Scheduler) {
 	log.Println("run task")
 	task := &tasks.Task{
-		Interval:          10 * time.Second,
+		Interval:          10 * time.Minute,
 		RunOnce:           false,
 		RunSingleInstance: false,
 		TaskFunc: func() error {

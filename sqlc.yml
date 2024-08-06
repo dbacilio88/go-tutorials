@@ -1,0 +1,26 @@
+version: "2"
+  #cloud:
+# Replace <PROJECT_ID> with your project ID from the sqlc Cloud dashboard
+#project: "01J2R84AR6R677JN21MB1YBTFP"
+sql:
+  # schema refers to where our schema definitions located
+  - schema: "./workspace/docker/db/migration/"
+    # queries refers to where our manually created queries located
+    queries: "./workspace/docker/db/query/"
+    engine: "postgresql"
+    database:
+      uri: "postgresql://postgres:postgres@localhost:5432/postgres?sslmode=disable"
+    gen:
+      go:
+        package: "sqlc"
+        out: "./pkg/adapters/db"
+        sql_package: "pgx/v5"
+        emit_json_tags: true
+        emit_interface: true
+        emit_empty_slices: true
+        overrides:
+          - db_type: "timestamptz"
+            go_type: "time.Time"
+          - db_type: "uuid"
+            go_type: "github.com/google/uuid.UUID"
+
