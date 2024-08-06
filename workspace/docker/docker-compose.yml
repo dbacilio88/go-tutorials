@@ -2,13 +2,28 @@ services:
   server-ssh:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ssh/Dockerfile
     container_name: server-ssh
     restart: always
     ports:
       - 2222:22
     stdin_open: true
     tty: true
+    networks:
+      - ssh-net
+
+  postgres-db:
+    build:
+      context: db
+      dockerfile: Dockerfile
+    container_name: postgres-db
+    env_file:
+      - db/.env
+    ports:
+      - 5432:5432
+    restart: always
+    volumes:
+      - ./data/pg:/var/lib/postgresql/data
     networks:
       - ssh-net
 

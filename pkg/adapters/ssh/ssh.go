@@ -1,7 +1,7 @@
 package ssh
 
 import (
-	"github.com/dbacilio88/go/pkg/adapters/ssh/config"
+	"github.com/dbacilio88/go/pkg/config"
 	client "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
 	"log"
