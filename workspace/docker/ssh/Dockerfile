@@ -13,7 +13,7 @@ RUN useradd -m -s /bin/bash cbaciliod && \
 # Create the directory for the SSH daemon to run
 # Copy your public key from the build context to the image
 # Replace /path/to/your/public_key with the actual path in your build context
-COPY keys/id_rsa.pub /tmp/id_rsa.pub
+COPY ../keys/id_rsa.pub /tmp/id_rsa.pub
 # Create SSH directory for the root user
 RUN mkdir -p /home/cbaciliod/.ssh && \
     chmod 700 /home/cbaciliod/.ssh && \

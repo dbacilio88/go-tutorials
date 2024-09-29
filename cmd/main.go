@@ -2,9 +2,9 @@ package main
 
 import (
 	"github.com/dbacilio88/go/pkg/adapters/ssh"
-	"github.com/dbacilio88/go/pkg/adapters/ssh/config"
-	"github.com/dbacilio88/go/pkg/adapters/ssh/server"
-	"github.com/dbacilio88/go/pkg/adapters/ssh/task"
+	"github.com/dbacilio88/go/pkg/config"
+	"github.com/dbacilio88/go/pkg/server"
+	"github.com/dbacilio88/go/pkg/task"
 	"log"
 	"os"
 	"os/signal"

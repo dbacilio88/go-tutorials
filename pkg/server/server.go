@@ -53,6 +53,7 @@ func (s *Server) ListenAndServe(addr string, quit <-chan struct{}) {
 		WriteTimeout: time.Second * 15,
 	}
 	go func() {
+
 		log.Println("start http server on", serv.Addr)
 		if err := serv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
 			log.Fatalf("http server listen error: %v", err)
