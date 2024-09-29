@@ -66,6 +66,7 @@ type Server struct {
 	Host string `mapstructure:"host" yaml:"host"`
 	Port string `mapstructure:"port" yaml:"port"`
 }
+
 type Ssh struct {
 	Host       string `mapstructure:"host" yaml:"host"`
 	Port       string `mapstructure:"port" yaml:"port"`
@@ -78,6 +79,7 @@ type Ssh struct {
 	SftpPath   string `mapstructure:"sftp_path" yaml:"sftp_path"`
 	Enable     bool   `mapstructure:"enable" yaml:"enable"`
 }
+
 type Scheduler struct {
 	Enable bool `mapstructure:"enable" yaml:"enable"`
 }
