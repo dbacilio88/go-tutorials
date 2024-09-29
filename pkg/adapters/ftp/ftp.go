@@ -82,9 +82,7 @@ func (s *Ftp) GetRootPath(conn *sftp.Client) error {
 }
 
 func (s *Ftp) GetFiles(conn *sftp.Client) error {
-
 	log.Println("Getting files from sftp server...")
-
 	dir, err := conn.ReadDir(viper.GetString("sftp_path"))
 	if err != nil {
 		log.Fatalf("Failed to get files from sftp server: %s", err)
@@ -100,9 +98,7 @@ func (s *Ftp) GetFiles(conn *sftp.Client) error {
 	return nil
 }
 func (s *Ftp) CreateFile(conn *sftp.Client) error {
-
 	log.Println("Create files from sftp server...")
-
 	dir, err := conn.ReadDir(viper.GetString("sftp_path"))
 	if err != nil {
 		log.Fatalf("Failed to get files from sftp server: %s", err)
@@ -118,7 +114,6 @@ func (s *Ftp) CreateFile(conn *sftp.Client) error {
 	return nil
 }
 func (s *Ftp) CreateDir(conn *sftp.Client, root string) error {
-
 	log.Println("Create dir from sftp server...")
 	p := path.Join(viper.GetString("sftp_path"), root)
 	err := conn.Mkdir(p)
