@@ -22,4 +22,17 @@ generate:
 tests:
 	go test -v -cover ./...
 
+mock:
+	mockgen -source pkg/adapters/db/db.go -destination mocks/pkg/adapters/db/db.go
+	#mockgen -source pkg/adapters/db/modles.go -destination mocks/pkg/adapters/db/models.go
+	#mockgen -source pkg/adapters/db/store.go -destination mocks/pkg/adapters/db/store.go
+	#mockgen -source pkg/adapters/db/querier.go -destination mocks/pkg/adapters/db/querier.go
+	mockgen -source pkg/adapters/ssh/ssh.go -destination mocks/pkg/adapters/ssh/ssh.go
+	mockgen -source pkg/adapters/ftp/ftp.go -destination mocks/pkg/adapters/ftp/ftp.go
+	mockgen -source pkg/adapters/mq/rabbitmq.go -destination mocks/pkg/adapters/mq/rabbitmq.go
+	mockgen -source pkg/components/helpers/random.go -destination mocks/pkg/components/helpers/random.go
+	mockgen -source pkg/config/configuration.go -destination mocks/pkg/config/configuration.go
+	mockgen -source pkg/server/server.go -destination mocks/pkg/server/server.go
+	mockgen -source pkg/task/task.go -destination mocks/pkg/task/task.go
+
 .PHONY: up down run delete
