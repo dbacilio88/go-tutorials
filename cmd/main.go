@@ -1,15 +1,12 @@
 package main
 
 import (
-	"github.com/dbacilio88/go/pkg/adapters/grpcs"
 	"github.com/dbacilio88/go/pkg/adapters/ssh"
-	"github.com/dbacilio88/go/pkg/clients"
 	"github.com/dbacilio88/go/pkg/config"
 	"github.com/dbacilio88/go/pkg/config/logger"
 	"github.com/dbacilio88/go/pkg/server"
 	"github.com/dbacilio88/go/pkg/task"
 	"go.uber.org/zap"
-	"google.golang.org/grpc"
 	"os"
 	"os/signal"
 	"syscall"
@@ -51,38 +48,34 @@ func main() {
 	_server := server.NewServer(console)
 	// Configura el manejo de señales.
 	stop := setupSignalHandler(console)
+
 	// go routine http server arg port, channel.
 	go _server.ListenAndServe(config.Config.Server.Port, stop)
+
+	// Usamos un WaitGroup para esperar que todos los servicios terminen
 
 	// create instance ssh adapter:
 	_ssh := ssh.NewShhAdapter(console)
 	// create instance scheduler adapter:
 	_task := task.NewScheduler(_ssh, console)
 	// create instance service grpcs:
-	grpcAdapterInstance := grpcs.NewManagementGrpcService(console)
+	//grpcAdapterInstance := grpcs.NewManagementGrpcService(console)
+
 	// create instance service client grpcs:
-	grpcClient, err := grpcAdapterInstance.GRPCConnectionClientManager()
+	//grpcClient, err := grpcAdapterInstance.GRPCConnectionClientManager(&wg)
 
-	if err != nil {
-		console.Error("error while initializing grpc connection", zap.Error(err))
-		return
-	}
+	//helloCreatorInstance := clients.NewHelloCreator()
 
-	helloCreatorInstance := clients.NewHelloCreator()
+	//helloServiceClientInstance := clients.NewHelloServiceClient(grpcClient, helloCreatorInstance)
 
-	helloServiceClientInstance := clients.NewHelloServiceClient(grpcClient, helloCreatorInstance)
+	//err = helloServiceClientInstance.Hello()
 
-	err = helloServiceClientInstance.Hello()
+	/*
+		defer func(connection *grpc.ClientConn) {
+			_ = connection.Close()
+		}(grpcClient)
 
-	if err != nil {
-		console.Error("create hello service failed", zap.Error(err))
-		return
-	}
-
-	defer func(connection *grpc.ClientConn) {
-		_ = connection.Close()
-	}(grpcClient)
-
+	*/
 	// Crear la tarea que se ejecutará cada 30 segundos
 	exec := _task.Create()
 

@@ -1,17 +1,4 @@
 services:
-  server-ssh:
-    build:
-      context: .
-      dockerfile: ssh/Dockerfile
-    container_name: server-ssh
-    restart: always
-    ports:
-      - 2222:22
-    stdin_open: true
-    tty: true
-    networks:
-      - ssh-net
-
   postgres-db:
     build:
       context: db

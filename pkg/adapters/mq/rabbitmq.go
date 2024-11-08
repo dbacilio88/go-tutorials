@@ -1,5 +1,10 @@
 package mq
 
+import (
+	"github.com/rabbitmq/amqp091-go"
+	"go.uber.org/zap"
+)
+
 /**
 *
 * rabbitmq
@@ -18,10 +23,29 @@ package mq
 *
  */
 
-type Executor interface{}
+type Executor interface {
+	CreateConnection(url string, host string) (*amqp091.Connection, error)
+	Consumer(connection *amqp091.Connection, queueName string) (<-chan amqp091.Delivery, error)
+}
 type RabbitMqAdapter struct {
+	console *zap.Logger
 }
 
-func NewRabbitMqAdapter() *RabbitMqAdapter {
-	return &RabbitMqAdapter{}
+func NewRabbitMqAdapter(console *zap.Logger) *RabbitMqAdapter {
+	return &RabbitMqAdapter{
+		console: console,
+	}
+}
+func (a *RabbitMqAdapter) CreateConnection(url string, host string) (*amqp091.Connection, error) {
+	conn, err := amqp091.DialConfig(url, amqp091.Config{
+		Vhost: host,
+	})
+	if err != nil {
+		a.console.Error("failed to connect to RabbitMq", zap.Error(err))
+		return nil, err
+	}
+	return conn, nil
+}
+func (adapter *RabbitMqAdapter) Consumer(connection *amqp091.Connection, queueName string) (<-chan amqp091.Delivery, error) {
+	return nil, nil
 }

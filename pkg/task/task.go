@@ -50,7 +50,7 @@ func (s *Scheduler) Create() *tasks.Scheduler {
 func (s *Scheduler) Run(exec *tasks.Scheduler) {
 	s.console.Info("run task")
 	task := &tasks.Task{
-		Interval:          100 * time.Minute,
+		Interval:          1 * time.Minute,
 		RunOnce:           false,
 		RunSingleInstance: false,
 		TaskFunc: func() error {

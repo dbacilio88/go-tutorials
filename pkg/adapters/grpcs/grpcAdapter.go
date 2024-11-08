@@ -6,6 +6,8 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"sync"
+	"time"
 )
 
 type server struct {
@@ -22,7 +24,9 @@ func NewManagementGrpcService(console *zap.Logger) *GrpcAdapter {
 	}
 }
 
-func (a GrpcAdapter) GRPCConnectionClientManager() (*grpc.ClientConn, error) {
+func (a GrpcAdapter) GRPCConnectionClientManager(wg *sync.WaitGroup) (*grpc.ClientConn, error) {
+	defer wg.Done()
+	time.Sleep(2 * time.Second)
 	addr := fmt.Sprintf("%s:%s", config.Config.GrpcServer.Host, config.Config.GrpcServer.Port)
 	a.console.Info("Connecting to client GRPC", zap.String("url", addr))
 	client, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
