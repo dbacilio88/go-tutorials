@@ -1,0 +1,74 @@
+syntax = "proto3";
+
+package proto;
+
+option go_package = "proto/hello";
+import "proto/google/date.proto";
+
+message Hello{
+  string first_name = 1;
+  string prefix = 2;
+}
+
+message HelloRequest{
+  Hello hello = 1;
+}
+
+message HelloResponse{
+  string custom_hello = 1;
+}
+
+message HelloManyLanguageRequest{
+  Hello hello = 1;
+}
+message HelloManyLanguageResponse{
+  string hello_language = 1;
+}
+
+
+message HellosGoodByeRequest{
+  Hello hello = 1;
+}
+
+message HellosGoodByeResponse{
+  string goodbye = 1;
+}
+
+message GoodByeRequest{
+  Hello hello = 1;
+}
+
+message GoodByeResponse{
+  string goodbye = 1;
+}
+
+
+message TransferRequest{
+  string from_account = 1;
+  string to_account = 2;
+  double amount = 3;
+}
+
+message TransferResponse{
+  google.type.Date create_at = 1;
+}
+
+service HelloService{
+  // unary
+  rpc Hello(HelloRequest) returns (HelloResponse);
+
+  // Server streaming
+  // The server return hello/greeting in different languages
+  //rpc HelloManyLanguages(HelloManyLanguageRequest) returns (stream HelloManyLanguageResponse){};
+
+  // client streaming
+  // Send many hellos and response with one good bye for all peoples
+  //rpc HelloGoodBye(stream HellosGoodByeRequest) returns (HellosGoodByeResponse);
+
+  // bidirectional streaming
+  // It will send many hellos and the server will response a goodbye by each one of them
+ // rpc GoodBye(stream GoodByeRequest) returns (stream GoodByeResponse);
+
+  // Error validate in grpc
+  //rpc Transfer(TransferRequest) returns (TransferResponse);
+}

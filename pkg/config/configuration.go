@@ -56,15 +56,24 @@ func Load(path string) {
 }
 
 type Configurations struct {
-	Server    Server    `mapstructure:"server" yaml:"server"`
-	Ssh       Ssh       `mapstructure:"ssh" yaml:"ssh"`
-	Scheduler Scheduler `mapstructure:"scheduler" yaml:"scheduler"`
+	Server     Server     `mapstructure:"server" yaml:"server"`
+	Ssh        Ssh        `mapstructure:"ssh" yaml:"ssh"`
+	Scheduler  Scheduler  `mapstructure:"scheduler" yaml:"scheduler"`
+	Database   Database   `mapstructure:"database" yaml:"database"`
+	Rabbitmq   Rabbitmq   `mapstructure:"rabbitmq" yaml:"rabbitmq"`
+	Queue      Queue      `mapstructure:"queue" yaml:"queue"`
+	GrpcServer GrpcServer `mapstructure:"grpc-server" yaml:"grpc-server"`
+	GrpcClient GrpcClient `mapstructure:"grpc-client" yaml:"grpc-client"`
 }
 
 // Server use mapstructure in document github.com/go-viper/mapstructure/v2
 type Server struct {
-	Host string `mapstructure:"host" yaml:"host"`
-	Port string `mapstructure:"port" yaml:"port"`
+	Host        string `mapstructure:"host" yaml:"host"`
+	Port        string `mapstructure:"port" yaml:"port"`
+	Name        string `mapstructure:"name" yaml:"name"`
+	Timeout     int    `mapstructure:"timeout" yaml:"timeout"`
+	Logging     string `mapstructure:"logging" yaml:"logging"`
+	Environment string `mapstructure:"environment" yaml:"environment"`
 }
 
 type Ssh struct {
@@ -82,4 +91,41 @@ type Ssh struct {
 
 type Scheduler struct {
 	Enable bool `mapstructure:"enable" yaml:"enable"`
+}
+
+type Database struct {
+	Host     string `mapstructure:"host" yaml:"host"`
+	Port     string `mapstructure:"port" yaml:"port"`
+	User     string `mapstructure:"user" yaml:"user"`
+	Password string `mapstructure:"password" yaml:"password"`
+	Dbname   string `mapstructure:"dbname" yaml:"dbname"`
+}
+
+type Rabbitmq struct {
+	Host     string `mapstructure:"host" yaml:"host"`
+	Port     string `mapstructure:"port" yaml:"port"`
+	User     string `mapstructure:"user" yaml:"user"`
+	Password string `mapstructure:"password" yaml:"password"`
+	Vhost    string `mapstructure:"vhost" yaml:"vhost"`
+	Protocol string `mapstructure:"protocol" yaml:"protocol"`
+}
+
+type Queue struct {
+	Consumer string `mapstructure:"consumer" yaml:"consumer"`
+	Producer string `mapstructure:"producer" yaml:"producer"`
+}
+
+type GrpcServer struct {
+	Host     string `mapstructure:"host" yaml:"host"`
+	Port     string `mapstructure:"port" yaml:"port"`
+	Cert     string `mapstructure:"cert" yaml:"cert"`
+	Key      string `mapstructure:"key" yaml:"key"`
+	Protocol string `mapstructure:"protocol" yaml:"protocol"`
+}
+type GrpcClient struct {
+	Host     string `mapstructure:"host" yaml:"host"`
+	Port     string `mapstructure:"port" yaml:"port"`
+	Cert     string `mapstructure:"cert" yaml:"cert"`
+	Key      string `mapstructure:"key" yaml:"key"`
+	Protocol string `mapstructure:"protocol" yaml:"protocol"`
 }

@@ -2,6 +2,7 @@ package ssh
 
 import (
 	"github.com/dbacilio88/go/pkg/config"
+	"go.uber.org/zap"
 	client "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
 	"log"
@@ -39,16 +40,19 @@ type Executor interface {
 }
 
 type ShhAdapter struct {
+	console *zap.Logger
 }
 
-func NewShhAdapter() *ShhAdapter {
-	return &ShhAdapter{}
+func NewShhAdapter(console *zap.Logger) *ShhAdapter {
+	return &ShhAdapter{
+		console: console,
+	}
 }
 
 func (s *ShhAdapter) Connection() (*client.Client, error) {
-	log.Println("connecting to server ssh")
+	s.console.Info("connecting to server ssh")
 
-	log.Println(net.JoinHostPort(config.Config.Ssh.Host, config.Config.Ssh.Port))
+	//log.Println(net.JoinHostPort(config.Config.Ssh.Host, config.Config.Ssh.Port))
 
 	conn, err := client.Dial(
 		config.Config.Ssh.Protocol,

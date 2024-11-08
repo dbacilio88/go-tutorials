@@ -4,8 +4,8 @@ import (
 	"github.com/dbacilio88/go/pkg/adapters/ftp"
 	"github.com/dbacilio88/go/pkg/adapters/ssh"
 	"github.com/madflojo/tasks"
+	"go.uber.org/zap"
 	client "golang.org/x/crypto/ssh"
-	"log"
 	"time"
 )
 
@@ -33,29 +33,31 @@ type Executor interface {
 }
 
 type Scheduler struct {
-	ssh ssh.Executor
+	ssh     ssh.Executor
+	console *zap.Logger
 }
 
-func NewScheduler(ssh ssh.Executor) *Scheduler {
+func NewScheduler(ssh ssh.Executor, console *zap.Logger) *Scheduler {
 	return &Scheduler{
-		ssh: ssh,
+		ssh:     ssh,
+		console: console,
 	}
 }
 func (s *Scheduler) Create() *tasks.Scheduler {
-	log.Println("create task")
+	s.console.Info("create task")
 	return tasks.New()
 }
 func (s *Scheduler) Run(exec *tasks.Scheduler) {
-	log.Println("run task")
+	s.console.Info("run task")
 	task := &tasks.Task{
-		Interval:          10 * time.Minute,
+		Interval:          100 * time.Minute,
 		RunOnce:           false,
 		RunSingleInstance: false,
 		TaskFunc: func() error {
-			log.Println("run task for 1 minute")
+			s.console.Info("run task for 10 minutes")
 			con, err := s.ssh.Connection()
 			if err != nil {
-				log.Fatalf("ssh connection error: %s", err)
+				s.console.Fatal("ssh connection error", zap.Error(err))
 				return err
 			}
 
@@ -63,26 +65,26 @@ func (s *Scheduler) Run(exec *tasks.Scheduler) {
 			_, err = instance.Connection(con)
 
 			if err != nil {
-				log.Fatalf("sftp connection error: %s", err)
+				s.console.Fatal("sftp connection error", zap.Error(err))
 				return err
 			}
 			defer func(con *client.Client) {
 				_ = con.Close()
-				log.Println("ssh connection closed")
+				s.console.Info("ssh connection closed")
 			}(con)
 
 			return nil
 		},
 		ErrFunc: func(err error) {
-			log.Fatalf("task err: %v", err)
+			s.console.Fatal("task err", zap.Error(err))
 		},
 	}
 
 	add, err := exec.Add(task)
 	if err != nil {
-		log.Fatalf("add task fail: %s", err)
+		s.console.Fatal("add task fail", zap.Error(err))
 		return
 	} else {
-		log.Println("add task success", add)
+		s.console.Info("add task success", zap.String("add", add))
 	}
 }

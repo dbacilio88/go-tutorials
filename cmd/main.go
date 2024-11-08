@@ -1,11 +1,15 @@
 package main
 
 import (
+	"github.com/dbacilio88/go/pkg/adapters/grpcs"
 	"github.com/dbacilio88/go/pkg/adapters/ssh"
+	"github.com/dbacilio88/go/pkg/clients"
 	"github.com/dbacilio88/go/pkg/config"
+	"github.com/dbacilio88/go/pkg/config/logger"
 	"github.com/dbacilio88/go/pkg/server"
 	"github.com/dbacilio88/go/pkg/task"
-	"log"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
 	"os"
 	"os/signal"
 	"syscall"
@@ -30,20 +34,59 @@ import (
  */
 
 func main() {
-	config.Load("workspace/")
-	// create instance ssh adapter:
-	_ssh := ssh.NewShhAdapter()
-	_server := server.NewServer()
-	_task := task.NewScheduler(_ssh)
 
+	config.Load("./")
+
+	console, err := logger.LogConfiguration(config.Config.Server.Logging)
+
+	if err != nil {
+		console.Error("error while initializing logger", zap.Error(err))
+		return
+	}
+
+	undo := zap.RedirectStdLog(console)
+	defer undo()
+
+	// create instance http server adapter:
+	_server := server.NewServer(console)
 	// Configura el manejo de señales.
-	stop := setupSignalHandler()
+	stop := setupSignalHandler(console)
+	// go routine http server arg port, channel.
 	go _server.ListenAndServe(config.Config.Server.Port, stop)
+
+	// create instance ssh adapter:
+	_ssh := ssh.NewShhAdapter(console)
+	// create instance scheduler adapter:
+	_task := task.NewScheduler(_ssh, console)
+	// create instance service grpcs:
+	grpcAdapterInstance := grpcs.NewManagementGrpcService(console)
+	// create instance service client grpcs:
+	grpcClient, err := grpcAdapterInstance.GRPCConnectionClientManager()
+
+	if err != nil {
+		console.Error("error while initializing grpc connection", zap.Error(err))
+		return
+	}
+
+	helloCreatorInstance := clients.NewHelloCreator()
+
+	helloServiceClientInstance := clients.NewHelloServiceClient(grpcClient, helloCreatorInstance)
+
+	err = helloServiceClientInstance.Hello()
+
+	if err != nil {
+		console.Error("create hello service failed", zap.Error(err))
+		return
+	}
+
+	defer func(connection *grpc.ClientConn) {
+		_ = connection.Close()
+	}(grpcClient)
 
 	// Crear la tarea que se ejecutará cada 30 segundos
 	exec := _task.Create()
 
-	log.Println("task is enable: ", config.Config.Scheduler.Enable)
+	console.Info("task is enable ", zap.Bool("enable", config.Config.Scheduler.Enable))
 	if config.Config.Scheduler.Enable {
 		_task.Run(exec)
 	}
@@ -52,7 +95,7 @@ func main() {
 }
 
 // SetupSignalHandler configura el manejo de señales para una parada controlada.
-func setupSignalHandler() (quitOs <-chan struct{}) {
+func setupSignalHandler(console *zap.Logger) (quitOs <-chan struct{}) {
 	quit := make(chan struct{})
 	// Canal para recibir señales del sistema
 	s := make(chan os.Signal, 1)
@@ -61,11 +104,11 @@ func setupSignalHandler() (quitOs <-chan struct{}) {
 	go func() {
 		// Espera la primera señal y cierra el canal `stop`.
 		next := <-s
-		log.Println("caught signal", next)
+		console.Info("caught signal next", zap.Any("signal", next))
 		close(quit)
 		// Espera una segunda señal para terminar inmediatamente.
 		next = <-s
-		log.Println("caught signal", next)
+		console.Info("caught signal next", zap.Any("signal", next))
 		os.Exit(1)
 	}()
 	return quit

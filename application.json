@@ -1,0 +1,57 @@
+{
+  "database": {
+    "dbname": "database",
+    "host": "localhost",
+    "password": "l1dEtYRuPSMYfm3r",
+    "port": 5432,
+    "user": "username"
+  },
+  "grpc-client": {
+    "cert": "./workspace/ssl/server.crt",
+    "host": "localhost",
+    "key": "./workspace/ssl/server.pem",
+    "port": 9090,
+    "protocol": "tcp"
+  },
+  "grpc-server": {
+    "cert": "./workspace/ssl/server.crt",
+    "host": "localhost",
+    "key": "./workspace/ssl/server.pem",
+    "port": 9091,
+    "protocol": "tcp"
+  },
+  "queue": {
+    "consumer": "QU-APP-CONSUMER",
+    "producer": "QU-APP-PRODUCER"
+  },
+  "rabbitmq": {
+    "host": "localhost",
+    "password": "guest",
+    "port": 5672,
+    "protocol": "amqp",
+    "user": "guest",
+    "vhost": "demo"
+  },
+  "scheduler": {
+    "enable": true
+  },
+  "server": {
+    "environment": "prod",
+    "host": "localhost",
+    "logging": "info",
+    "name": "go",
+    "port": ":3000",
+    "timeout": 30
+  },
+  "ssh": {
+    "enable": false,
+    "host": "localhost",
+    "known_hosts": "pkg/adapters/ssh/workspace/docker/keys/known_hosts",
+    "password": "cbaciliod",
+    "port": 2222,
+    "private_key": "pkg/adapters/ssh/workspace/docker/keys/id_rsa",
+    "protocol": "tcp",
+    "public_key": "pkg/adapters/ssh/workspace/docker/keys/id_rsa.pub",
+    "username": "cbaciliod"
+  }
+}
