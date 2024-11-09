@@ -2,7 +2,7 @@
 // versions:
 // 	protoc-gen-go v1.35.1
 // 	protoc        v5.27.1
-// source: proto/hello.proto
+// source: proto/hservice.proto
 
 package hello
 
@@ -79,7 +79,7 @@ type HelloRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Hello *Hello `protobuf:"bytes,1,opt,name=hello,proto3" json:"hello,omitempty"`
+	Hello *Hello `protobuf:"bytes,1,opt,name=hservice,proto3" json:"hservice,omitempty"`
 }
 
 func (x *HelloRequest) Reset() {
@@ -169,7 +169,7 @@ type HelloManyLanguageRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Hello *Hello `protobuf:"bytes,1,opt,name=hello,proto3" json:"hello,omitempty"`
+	Hello *Hello `protobuf:"bytes,1,opt,name=hservice,proto3" json:"hservice,omitempty"`
 }
 
 func (x *HelloManyLanguageRequest) Reset() {
@@ -259,7 +259,7 @@ type HellosGoodByeRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Hello *Hello `protobuf:"bytes,1,opt,name=hello,proto3" json:"hello,omitempty"`
+	Hello *Hello `protobuf:"bytes,1,opt,name=hservice,proto3" json:"hservice,omitempty"`
 }
 
 func (x *HellosGoodByeRequest) Reset() {
@@ -349,7 +349,7 @@ type GoodByeRequest struct {
 	sizeCache     protoimpl.SizeCache
 	unknownFields protoimpl.UnknownFields
 
-	Hello *Hello `protobuf:"bytes,1,opt,name=hello,proto3" json:"hello,omitempty"`
+	Hello *Hello `protobuf:"bytes,1,opt,name=hservice,proto3" json:"hservice,omitempty"`
 }
 
 func (x *GoodByeRequest) Reset() {
@@ -625,10 +625,10 @@ var file_proto_hello_proto_goTypes = []any{
 	(*date.Date)(nil),                 // 11: google.type.Date
 }
 var file_proto_hello_proto_depIdxs = []int32{
-	0,  // 0: proto.HelloRequest.hello:type_name -> proto.Hello
-	0,  // 1: proto.HelloManyLanguageRequest.hello:type_name -> proto.Hello
-	0,  // 2: proto.HellosGoodByeRequest.hello:type_name -> proto.Hello
-	0,  // 3: proto.GoodByeRequest.hello:type_name -> proto.Hello
+	0,  // 0: proto.HelloRequest.hservice:type_name -> proto.Hello
+	0,  // 1: proto.HelloManyLanguageRequest.hservice:type_name -> proto.Hello
+	0,  // 2: proto.HellosGoodByeRequest.hservice:type_name -> proto.Hello
+	0,  // 3: proto.GoodByeRequest.hservice:type_name -> proto.Hello
 	11, // 4: proto.TransferResponse.create_at:type_name -> google.type.Date
 	1,  // 5: proto.HelloService.Hello:input_type -> proto.HelloRequest
 	2,  // 6: proto.HelloService.Hello:output_type -> proto.HelloResponse

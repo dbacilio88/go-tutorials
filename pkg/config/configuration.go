@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"github.com/spf13/viper"
 	"log"
 )
@@ -52,18 +53,16 @@ func Load(path string) {
 	}
 
 	log.Println("Successfully loaded config")
-
 }
 
 type Configurations struct {
-	Server     Server     `mapstructure:"server" yaml:"server"`
-	Ssh        Ssh        `mapstructure:"ssh" yaml:"ssh"`
-	Scheduler  Scheduler  `mapstructure:"scheduler" yaml:"scheduler"`
-	Database   Database   `mapstructure:"database" yaml:"database"`
-	Rabbitmq   Rabbitmq   `mapstructure:"rabbitmq" yaml:"rabbitmq"`
-	Queue      Queue      `mapstructure:"queue" yaml:"queue"`
-	GrpcServer GrpcServer `mapstructure:"grpc-server" yaml:"grpc-server"`
-	GrpcClient GrpcClient `mapstructure:"grpc-client" yaml:"grpc-client"`
+	Server    Server    `mapstructure:"server" yaml:"server"`
+	Ssh       Ssh       `mapstructure:"ssh" yaml:"ssh"`
+	Scheduler Scheduler `mapstructure:"scheduler" yaml:"scheduler"`
+	Database  Database  `mapstructure:"database" yaml:"database"`
+	Rabbitmq  Rabbitmq  `mapstructure:"rabbitmq" yaml:"rabbitmq"`
+	Queue     Queue     `mapstructure:"queue" yaml:"queue"`
+	Grpc      Grpc      `mapstructure:"grpc" yaml:"grpc"`
 }
 
 // Server use mapstructure in document github.com/go-viper/mapstructure/v2
@@ -115,17 +114,19 @@ type Queue struct {
 	Producer string `mapstructure:"producer" yaml:"producer"`
 }
 
-type GrpcServer struct {
-	Host     string `mapstructure:"host" yaml:"host"`
-	Port     string `mapstructure:"port" yaml:"port"`
+type Grpc struct {
+	Server   string `mapstructure:"server" yaml:"server"`
+	Client   string `mapstructure:"client" yaml:"client"`
+	Protocol string `mapstructure:"protocol" yaml:"protocol"`
 	Cert     string `mapstructure:"cert" yaml:"cert"`
 	Key      string `mapstructure:"key" yaml:"key"`
-	Protocol string `mapstructure:"protocol" yaml:"protocol"`
 }
-type GrpcClient struct {
-	Host     string `mapstructure:"host" yaml:"host"`
-	Port     string `mapstructure:"port" yaml:"port"`
-	Cert     string `mapstructure:"cert" yaml:"cert"`
-	Key      string `mapstructure:"key" yaml:"key"`
-	Protocol string `mapstructure:"protocol" yaml:"protocol"`
+
+func GetDomainRabbitConnection() string {
+	return fmt.Sprintf("%s://%s:%s@%s:%s/",
+		Config.Rabbitmq.Protocol,
+		Config.Rabbitmq.User,
+		Config.Rabbitmq.Password,
+		Config.Rabbitmq.Host,
+		Config.Rabbitmq.Port)
 }

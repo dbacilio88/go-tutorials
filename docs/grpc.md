@@ -168,7 +168,7 @@ Prerequisites
 
 ```shell
 go install google.golang.org/protobuf/cmd/protoc-gen-go@latest
-go get -u google.golang.org/grpc
+go get -u google.golang.org/grpcs
 ``` 
 
 Deprecated:

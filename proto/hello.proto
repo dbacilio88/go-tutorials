@@ -2,7 +2,7 @@ syntax = "proto3";
 
 package proto;
 
-option go_package = "proto/hello";
+option go_package = "proto/hservice";
 import "proto/google/date.proto";
 
 message Hello{
@@ -17,7 +17,7 @@ message HelloRequest{
 message HelloResponse{
   string custom_hello = 1;
 }
-
+/*
 message HelloManyLanguageRequest{
   Hello hello = 1;
 }
@@ -52,6 +52,7 @@ message TransferRequest{
 message TransferResponse{
   google.type.Date create_at = 1;
 }
+ */
 
 service HelloService{
   // unary

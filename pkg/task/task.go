@@ -2,7 +2,9 @@ package task
 
 import (
 	"github.com/dbacilio88/go/pkg/adapters/ftp"
+	"github.com/dbacilio88/go/pkg/adapters/queue"
 	"github.com/dbacilio88/go/pkg/adapters/ssh"
+	"github.com/dbacilio88/go/pkg/config"
 	"github.com/madflojo/tasks"
 	"go.uber.org/zap"
 	client "golang.org/x/crypto/ssh"
@@ -33,14 +35,16 @@ type Executor interface {
 }
 
 type Scheduler struct {
-	ssh     ssh.Executor
-	console *zap.Logger
+	ssh           ssh.Executor
+	console       *zap.Logger
+	rabbitAdapter queue.Executor
 }
 
-func NewScheduler(ssh ssh.Executor, console *zap.Logger) *Scheduler {
+func NewScheduler(ssh ssh.Executor, console *zap.Logger, rabbitAdapter queue.Executor) *Scheduler {
 	return &Scheduler{
-		ssh:     ssh,
-		console: console,
+		ssh:           ssh,
+		console:       console,
+		rabbitAdapter: rabbitAdapter,
 	}
 }
 func (s *Scheduler) Create() *tasks.Scheduler {
@@ -50,7 +54,7 @@ func (s *Scheduler) Create() *tasks.Scheduler {
 func (s *Scheduler) Run(exec *tasks.Scheduler) {
 	s.console.Info("run task")
 	task := &tasks.Task{
-		Interval:          1 * time.Minute,
+		Interval:          10 * time.Minute,
 		RunOnce:           false,
 		RunSingleInstance: false,
 		TaskFunc: func() error {
@@ -72,6 +76,12 @@ func (s *Scheduler) Run(exec *tasks.Scheduler) {
 				_ = con.Close()
 				s.console.Info("ssh connection closed")
 			}(con)
+
+			err = s.rabbitAdapter.SendMessage(config.Config.Queue.Producer, []byte("se creo task"))
+			if err != nil {
+				s.console.Fatal("send messages error", zap.Error(err))
+				return err
+			}
 
 			return nil
 		},

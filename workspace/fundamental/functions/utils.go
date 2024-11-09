@@ -43,7 +43,7 @@ func convertToNumber(text string) (int, string) {
 
 	num, err := strconv.Atoi(text)
 	if err != nil {
-		return 0, "hubo un error, message:spring " + err.Error()
+		return 0, "hubo un error, messages:spring " + err.Error()
 	}
 
 	if num > 100 {

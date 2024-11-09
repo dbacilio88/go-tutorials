@@ -6,13 +6,7 @@ import (
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
-	"sync"
-	"time"
 )
-
-type server struct {
-	//proto.UnimplementedHelloServiceServer
-}
 
 type GrpcAdapter struct {
 	console *zap.Logger
@@ -24,17 +18,35 @@ func NewManagementGrpcService(console *zap.Logger) *GrpcAdapter {
 	}
 }
 
-func (a GrpcAdapter) GRPCConnectionClientManager(wg *sync.WaitGroup) (*grpc.ClientConn, error) {
-	defer wg.Done()
-	time.Sleep(2 * time.Second)
-	addr := fmt.Sprintf("%s:%s", config.Config.GrpcServer.Host, config.Config.GrpcServer.Port)
-	a.console.Info("Connecting to client GRPC", zap.String("url", addr))
-	client, err := grpc.NewClient(addr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+func (a *GrpcAdapter) GRPCConnectionClientManager() (*grpc.ClientConn, error) {
+	fmt.Println("Host ", config.Config.Grpc.Server)
+	a.console.Info("connecting to server grpcs", zap.String("url", config.Config.Grpc.Server))
+	return grpc.NewClient(config.Config.Grpc.Server, grpc.WithTransportCredentials(insecure.NewCredentials()))
+}
+
+func (a *GrpcAdapter) EnsureConnection(connection *grpc.ClientConn) error {
+	a.console.Info("start ensure connection")
+	a.console.Info("connection grpcs down, retry get connection")
+
+	conn, err := a.GRPCConnectionClientManager()
 	if err != nil {
-		a.console.Error("error connecting to grpc server", zap.Error(err))
-		return nil, err
+		a.failOnError(err, "error retrying get connection grpcs")
+		return err
 	}
 
-	a.console.Info("Connected to client GRPC", zap.String("state", client.GetState().String()))
-	return client, nil
+	a.console.Info("connection grpcs restored")
+
+	connection = conn
+
+	defer func(connection *grpc.ClientConn) {
+		_ = connection.Close()
+	}(connection)
+
+	return nil
+
+}
+func (a *GrpcAdapter) failOnError(err error, msg string) {
+	if err != nil {
+		a.console.Error(msg, zap.Error(err))
+	}
 }

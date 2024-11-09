@@ -1,4 +1,4 @@
-package rabbitmq
+package connection
 
 import (
 	"github.com/dbacilio88/go/pkg/adapters/queue"
@@ -6,9 +6,9 @@ import (
 
 /**
 *
-* rabbit
+* rabbitmq
 * <p>
-* rabbit file
+* rabbitmq file
 *
 * Copyright (c) 2024 All rights reserved.
 *
@@ -18,18 +18,18 @@ import (
 *
 * @author bxcode
 * @author dbacilio88@outlook.es
-* @since 7/11/2024
+* @since 8/11/2024
 *
  */
 
 type Executor interface {
 	RabbitMqConnection() error
 }
+
 type ManagerConnection struct {
 	rabbitmqAdapter queue.Executor
 }
 
-// NewManagerConnection create new instance ManageConnection
 func NewManagerConnection(rabbitmqAdapter queue.Executor) *ManagerConnection {
 	return &ManagerConnection{
 		rabbitmqAdapter: rabbitmqAdapter,

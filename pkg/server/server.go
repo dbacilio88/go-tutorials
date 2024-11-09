@@ -53,7 +53,7 @@ func NewServer(console *zap.Logger) *Server {
 
 // Hello Implementación del método Hello del servicio gRPC
 func (s *grpcServer) Hello(ctx context.Context, in *proto.HelloRequest) (*proto.HelloResponse, error) {
-	s.console.Info("Received hello request", zap.String("name", in.GetHello().GetFirstName()))
+	s.console.Info("Received hservice request", zap.String("name", in.GetHello().GetFirstName()))
 
 	tqr := in.GetHello()
 	prefix := tqr.GetPrefix()

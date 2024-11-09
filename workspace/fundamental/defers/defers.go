@@ -25,9 +25,9 @@ import (
 
 func Defers() {
 
-	fmt.Println("first message")
-	defer fmt.Println("final message")
-	fmt.Println("second message")
+	fmt.Println("first messages")
+	defer fmt.Println("final messages")
+	fmt.Println("second messages")
 	DemoPanic()
 }
 

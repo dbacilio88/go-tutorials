@@ -32,22 +32,16 @@ rabbitmq:
   port: 5672
   user: guest
   password: guest
-  vhost: demo
+  vhost: /
   protocol: amqp
 
 queue:
   consumer: "QU-APP-CONSUMER"
   producer: "QU-APP-PRODUCER"
 
-grpc-server:
-  host: localhost
-  port: 9091
-  protocol: tcp
-  cert: ./workspace/ssl/server.crt
-  key: ./workspace/ssl/server.pem
-grpc-client:
-  host: localhost
-  port: 9090
+grpc:
+  server: localhost:9091
+  client: localhost:9092
   protocol: tcp
   cert: ./workspace/ssl/server.crt
   key: ./workspace/ssl/server.pem

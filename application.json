@@ -6,19 +6,12 @@
     "port": 5432,
     "user": "username"
   },
-  "grpc-client": {
+  "grpc": {
     "cert": "./workspace/ssl/server.crt",
-    "host": "localhost",
+    "client": "localhost:9092",
     "key": "./workspace/ssl/server.pem",
-    "port": 9090,
-    "protocol": "tcp"
-  },
-  "grpc-server": {
-    "cert": "./workspace/ssl/server.crt",
-    "host": "localhost",
-    "key": "./workspace/ssl/server.pem",
-    "port": 9091,
-    "protocol": "tcp"
+    "protocol": "tcp",
+    "server": "localhost:9091"
   },
   "queue": {
     "consumer": "QU-APP-CONSUMER",
@@ -30,7 +23,7 @@
     "port": 5672,
     "protocol": "amqp",
     "user": "guest",
-    "vhost": "demo"
+    "vhost": "/"
   },
   "scheduler": {
     "enable": true

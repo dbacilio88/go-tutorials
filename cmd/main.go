@@ -1,12 +1,20 @@
 package main
 
 import (
+	"github.com/dbacilio88/go/pkg/adapters/command"
+	"github.com/dbacilio88/go/pkg/adapters/grpcs"
+	"github.com/dbacilio88/go/pkg/adapters/messages"
+	"github.com/dbacilio88/go/pkg/adapters/queue"
 	"github.com/dbacilio88/go/pkg/adapters/ssh"
+	"github.com/dbacilio88/go/pkg/clients/hservice"
 	"github.com/dbacilio88/go/pkg/config"
 	"github.com/dbacilio88/go/pkg/config/logger"
+	"github.com/dbacilio88/go/pkg/config/rabbitmq"
 	"github.com/dbacilio88/go/pkg/server"
 	"github.com/dbacilio88/go/pkg/task"
+	"github.com/dbacilio88/go/services/validation"
 	"go.uber.org/zap"
+	"google.golang.org/grpc"
 	"os"
 	"os/signal"
 	"syscall"
@@ -42,46 +50,78 @@ func main() {
 	}
 
 	undo := zap.RedirectStdLog(console)
+
 	defer undo()
 
+	// create instance grpc client adapter:
+	grpcAdapter := grpcs.NewManagementGrpcService(console)
+	// create connection grpc client adapter:
+	grpcConnectionClient, err := grpcAdapter.GRPCConnectionClientManager()
+
+	if err != nil {
+		console.Error("error while initializing grpc connection client", zap.Error(err))
+		return
+	}
+
+	defer func(grpcConnectionClient *grpc.ClientConn) {
+		err := grpcConnectionClient.Close()
+		if err != nil {
+			console.Error("error while closing grpc connection client", zap.Error(err))
+		}
+	}(grpcConnectionClient)
+
+	// create instance validate request adapter:
+	validationInstance := validation.NewValidatorService(console)
+
 	// create instance http server adapter:
-	_server := server.NewServer(console)
+	serverInstance := server.NewServer(console)
+
 	// Configura el manejo de señales.
 	stop := setupSignalHandler(console)
 
 	// go routine http server arg port, channel.
-	go _server.ListenAndServe(config.Config.Server.Port, stop)
+	go serverInstance.ListenAndServe(config.Config.Server.Port, stop)
 
-	// Usamos un WaitGroup para esperar que todos los servicios terminen
+	// create instance client grpc creator:
+	grpcClient := hservice.NewGrpcClientCreator()
+
+	// create instance client grpc service:
+	helloService := hservice.NewHelloService(console, grpcConnectionClient, grpcClient)
+
+	// create instance grpc command adapter:
+	commandAdapter := command.NewGrpcHelloCommand(console, &helloService)
+
+	// create instance rabbit adapter:
+	rabbitInstance := queue.NewMqAdapter(console)
+
+	// create instance manager connection rabbit:
+	rabbitConnection := rabbitmq.NewManagerConnection(rabbitInstance)
+
+	// create connection rabbit:
+	err = rabbitConnection.RabbitMqConnection()
+
+	if err != nil {
+		console.Error("error while initializing rabbitmq connection", zap.Error(err))
+		return
+	}
+
+	// create instance messages received:
+	messageInstance := messages.NewMessageAdapter(console, rabbitInstance, commandAdapter, validationInstance)
+
+	go messageInstance.ReceiveMessages(config.Config.Queue.Consumer)
 
 	// create instance ssh adapter:
-	_ssh := ssh.NewShhAdapter(console)
+	sshInstance := ssh.NewShhAdapter(console)
+
 	// create instance scheduler adapter:
-	_task := task.NewScheduler(_ssh, console)
-	// create instance service grpcs:
-	//grpcAdapterInstance := grpcs.NewManagementGrpcService(console)
+	taskInstance := task.NewScheduler(sshInstance, console, rabbitInstance)
 
-	// create instance service client grpcs:
-	//grpcClient, err := grpcAdapterInstance.GRPCConnectionClientManager(&wg)
-
-	//helloCreatorInstance := clients.NewHelloCreator()
-
-	//helloServiceClientInstance := clients.NewHelloServiceClient(grpcClient, helloCreatorInstance)
-
-	//err = helloServiceClientInstance.Hello()
-
-	/*
-		defer func(connection *grpc.ClientConn) {
-			_ = connection.Close()
-		}(grpcClient)
-
-	*/
 	// Crear la tarea que se ejecutará cada 30 segundos
-	exec := _task.Create()
+	exec := taskInstance.Create()
 
 	console.Info("task is enable ", zap.Bool("enable", config.Config.Scheduler.Enable))
 	if config.Config.Scheduler.Enable {
-		_task.Run(exec)
+		taskInstance.Run(exec)
 	}
 
 	select {}
