@@ -47,7 +47,7 @@ func (a *GrpcHelloCommand) ExecuteHelloCommand(context context.Context, req *pro
 
 	var result interface{}
 
-	res, err := a.helloService.Hello(context, req)
+	res, err := a.helloService.HelloService(context, req)
 
 	if err != nil {
 		a.failOnError(err, "error executing hello command")

@@ -111,7 +111,7 @@ func main() {
 	go messageInstance.ReceiveMessages(config.Config.Queue.Consumer)
 
 	// create instance ssh adapter:
-	sshInstance := ssh.NewShhAdapter(console)
+	sshInstance := ssh.NewShhAdapter(console, rabbitInstance)
 
 	// create instance scheduler adapter:
 	taskInstance := task.NewScheduler(sshInstance, console, rabbitInstance)

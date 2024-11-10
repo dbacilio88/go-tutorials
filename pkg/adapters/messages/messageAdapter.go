@@ -34,6 +34,7 @@ import (
 
 type Executor interface {
 	ReceiveMessages(queue string)
+	ProcessMessages()
 }
 
 type MessageAdapter struct {
@@ -89,6 +90,7 @@ func (a *MessageAdapter) ReceiveMessages(queue string) {
 						a.failOnError(err, "Failed to validate request")
 						return
 					}
+
 					a.console.Info("validation data", zap.Any("request", request))
 
 					ctx := utils.AddParamToContext(uuid.New().String())
@@ -148,6 +150,11 @@ func (a *MessageAdapter) parseBodyMessage(queueName string, body []byte) (map[st
 
 	return result, nil
 }
+
+func (a *MessageAdapter) ProcessMessage() {
+
+}
+
 func (a *MessageAdapter) failOnError(err error, msg string) {
 	if err != nil {
 		fullMessage := fmt.Sprintf("%s: %s", msg, err.Error())

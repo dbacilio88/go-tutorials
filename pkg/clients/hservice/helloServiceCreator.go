@@ -9,13 +9,18 @@ type GrpcClientCreator struct {
 }
 
 type HelloServiceCreator interface {
-	NewClient(connection *grpc.ClientConn) proto.HelloServiceClient
+	HelloServiceClient(connection *grpc.ClientConn) proto.HelloServiceClient
+	QueryDataServiceClient(connection *grpc.ClientConn) proto.QueryDataServiceClient
 }
 
 func NewGrpcClientCreator() *GrpcClientCreator {
 	return &GrpcClientCreator{}
 }
 
-func (r *GrpcClientCreator) NewClient(connection *grpc.ClientConn) proto.HelloServiceClient {
+func (r *GrpcClientCreator) HelloServiceClient(connection *grpc.ClientConn) proto.HelloServiceClient {
 	return proto.NewHelloServiceClient(connection)
+}
+
+func (r *GrpcClientCreator) QueryDataServiceClient(connection *grpc.ClientConn) proto.QueryDataServiceClient {
+	return proto.NewQueryDataServiceClient(connection)
 }

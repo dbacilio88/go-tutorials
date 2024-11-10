@@ -1,10 +1,9 @@
 package task
 
 import (
-	"github.com/dbacilio88/go/pkg/adapters/ftp"
 	"github.com/dbacilio88/go/pkg/adapters/queue"
+	"github.com/dbacilio88/go/pkg/adapters/sftp"
 	"github.com/dbacilio88/go/pkg/adapters/ssh"
-	"github.com/dbacilio88/go/pkg/config"
 	"github.com/madflojo/tasks"
 	"go.uber.org/zap"
 	client "golang.org/x/crypto/ssh"
@@ -54,18 +53,18 @@ func (s *Scheduler) Create() *tasks.Scheduler {
 func (s *Scheduler) Run(exec *tasks.Scheduler) {
 	s.console.Info("run task")
 	task := &tasks.Task{
-		Interval:          10 * time.Minute,
+		Interval:          1 * time.Minute,
 		RunOnce:           false,
 		RunSingleInstance: false,
 		TaskFunc: func() error {
-			s.console.Info("run task for 10 minutes")
+			s.console.Info("run task for 1 minutes")
 			con, err := s.ssh.Connection()
 			if err != nil {
 				s.console.Fatal("ssh connection error", zap.Error(err))
 				return err
 			}
 
-			instance := ftp.NewFtp()
+			instance := sftp.NewFtp(s.console, s.rabbitAdapter)
 			_, err = instance.Connection(con)
 
 			if err != nil {
@@ -76,12 +75,6 @@ func (s *Scheduler) Run(exec *tasks.Scheduler) {
 				_ = con.Close()
 				s.console.Info("ssh connection closed")
 			}(con)
-
-			err = s.rabbitAdapter.SendMessage(config.Config.Queue.Producer, []byte("se creo task"))
-			if err != nil {
-				s.console.Fatal("send messages error", zap.Error(err))
-				return err
-			}
 
 			return nil
 		},

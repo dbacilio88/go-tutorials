@@ -1,7 +1,6 @@
 package grpcs
 
 import (
-	"fmt"
 	"github.com/dbacilio88/go/pkg/config"
 	"go.uber.org/zap"
 	"google.golang.org/grpc"
@@ -19,7 +18,6 @@ func NewManagementGrpcService(console *zap.Logger) *GrpcAdapter {
 }
 
 func (a *GrpcAdapter) GRPCConnectionClientManager() (*grpc.ClientConn, error) {
-	fmt.Println("Host ", config.Config.Grpc.Server)
 	a.console.Info("connecting to server grpcs", zap.String("url", config.Config.Grpc.Server))
 	return grpc.NewClient(config.Config.Grpc.Server, grpc.WithTransportCredentials(insecure.NewCredentials()))
 }
