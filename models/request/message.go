@@ -27,3 +27,11 @@ type ValidationData struct {
 	Key   string
 	Value string
 }
+
+type MessageQueueRequest struct {
+	Key   string `json:"key" validate: "require"`
+	Value string `json:"value" validate: "require"`
+}
+
+type MessageResponse struct {
+}

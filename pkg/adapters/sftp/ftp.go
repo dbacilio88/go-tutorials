@@ -1,6 +1,7 @@
 package sftp
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/dbacilio88/go/pkg/adapters/queue"
 	"github.com/dbacilio88/go/pkg/config"
@@ -72,7 +73,13 @@ func (s *FtpAdapter) Connection(con *ssh.Client) (*sftp.Client, error) {
 		return nil, err
 	}
 
-	err = s.rabbitAdapter.SendMessage(config.Config.Queue.Producer, []byte(nameDir))
+	data, err := json.Marshal(nameDir)
+	if err != nil {
+		s.failOnError(err, "failed to marshal data directory")
+		return nil, err
+	}
+
+	err = s.rabbitAdapter.SendMessage(config.Config.Queue.Producer, data)
 	if err != nil {
 		s.failOnError(err, "failed to send messages")
 		return nil, err

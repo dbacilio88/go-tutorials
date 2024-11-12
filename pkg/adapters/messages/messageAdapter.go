@@ -94,13 +94,13 @@ func (a *MessageAdapter) ReceiveMessages(queue string) {
 					a.console.Info("validation data", zap.Any("request", request))
 
 					ctx := utils.AddParamToContext(uuid.New().String())
-					tqr := hello.HelloRequest{
+					reqH := hello.HelloRequest{
 						Hello: &hello.Hello{
 							Prefix:    request.Prefix,
 							FirstName: request.Name,
 						},
 					}
-					response, code, err = a.grpcHelloCommand.ExecuteHelloCommand(ctx, &tqr)
+					response, code, err = a.grpcHelloCommand.ExecuteHelloServiceCommand(ctx, &reqH)
 
 					if err != nil {
 						a.failOnError(err, "Failed to execute hello command")
@@ -108,6 +108,34 @@ func (a *MessageAdapter) ReceiveMessages(queue string) {
 					}
 
 					a.console.Info("data from server grpc", zap.Any("response", response), zap.String("code", code))
+
+					tqr := hello.TransactionQueryRequest{
+						NameView: "DATA_LOG",
+					}
+
+					productos := []Filter{
+						{"DL_ID", "ID", 1},
+						{"DL_UUID", "UUID", 2},
+						{"DL_NAME", "NAME", 3},
+					}
+
+					var tqd []*hello.TransactionQueryDetail
+
+					for i, filter := range productos {
+						tqd = append(tqd, &hello.TransactionQueryDetail{
+							MappingSqlModel: filter.ViewColumn,
+							Name:            filter.NameMapping,
+							Order:           int32(i),
+						})
+					}
+
+					tqr.TransactionQueryDetail = tqd
+
+					response, code, err = a.grpcHelloCommand.ExecuteQueryDataServiceCommand(ctx, &tqr)
+					if err != nil {
+						a.failOnError(err, "Failed to execute query data service command")
+						return
+					}
 
 				}
 
@@ -160,4 +188,10 @@ func (a *MessageAdapter) failOnError(err error, msg string) {
 		fullMessage := fmt.Sprintf("%s: %s", msg, err.Error())
 		a.console.Error(fullMessage, zap.Error(err))
 	}
+}
+
+type Filter struct {
+	ViewColumn  string
+	NameMapping string
+	Order       int
 }
