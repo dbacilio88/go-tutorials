@@ -3,6 +3,7 @@ package command
 import (
 	"context"
 	"errors"
+	"fmt"
 	"github.com/dbacilio88/go/pkg/clients/hservice"
 	proto "github.com/dbacilio88/go/proto/hello"
 	"go.uber.org/zap"
@@ -71,7 +72,7 @@ func (a *GrpcHelloCommand) ExecuteQueryDataServiceCommand(context context.Contex
 	var result interface{}
 
 	stream, err := a.helloService.QueryDataService(context, req)
-
+	fmt.Println(stream)
 	if err != nil {
 		a.failOnError(err, "error executing hello command")
 		return nil, "999", err

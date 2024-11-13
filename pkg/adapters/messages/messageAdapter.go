@@ -113,7 +113,7 @@ func (a *MessageAdapter) ReceiveMessages(queue string) {
 						NameView: "DATA_LOG",
 					}
 
-					productos := []Filter{
+					parameters := []Parameter{
 						{"DL_ID", "ID", 1},
 						{"DL_UUID", "UUID", 2},
 						{"DL_NAME", "NAME", 3},
@@ -121,21 +121,23 @@ func (a *MessageAdapter) ReceiveMessages(queue string) {
 
 					var tqd []*hello.TransactionQueryDetail
 
-					for i, filter := range productos {
+					for i, filter := range parameters {
+						fmt.Println(i)
 						tqd = append(tqd, &hello.TransactionQueryDetail{
 							MappingSqlModel: filter.ViewColumn,
 							Name:            filter.NameMapping,
-							Order:           int32(i),
+							Order:           (int32)(i),
 						})
 					}
 
 					tqr.TransactionQueryDetail = tqd
 
-					response, code, err = a.grpcHelloCommand.ExecuteQueryDataServiceCommand(ctx, &tqr)
+					responses, code, err := a.grpcHelloCommand.ExecuteQueryDataServiceCommand(ctx, &tqr)
 					if err != nil {
 						a.failOnError(err, "Failed to execute query data service command")
 						return
 					}
+					a.console.Info("data from server grpc", zap.Any("responses", responses), zap.String("code", code))
 
 				}
 
@@ -190,7 +192,7 @@ func (a *MessageAdapter) failOnError(err error, msg string) {
 	}
 }
 
-type Filter struct {
+type Parameter struct {
 	ViewColumn  string
 	NameMapping string
 	Order       int
