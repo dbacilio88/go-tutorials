@@ -1,11 +1,20 @@
 package main
 
 import (
+	"github.com/dbacilio88/go/pkg/adapters/command"
+	"github.com/dbacilio88/go/pkg/adapters/grpcs"
+	"github.com/dbacilio88/go/pkg/adapters/messages"
+	"github.com/dbacilio88/go/pkg/adapters/queue"
 	"github.com/dbacilio88/go/pkg/adapters/ssh"
+	"github.com/dbacilio88/go/pkg/clients/hservice"
 	"github.com/dbacilio88/go/pkg/config"
+	"github.com/dbacilio88/go/pkg/config/logger"
+	"github.com/dbacilio88/go/pkg/config/rabbitmq"
 	"github.com/dbacilio88/go/pkg/server"
 	"github.com/dbacilio88/go/pkg/task"
-	"log"
+	"github.com/dbacilio88/go/services/validation"
+	"go.uber.org/zap"
+	"google.golang.org/grpc"
 	"os"
 	"os/signal"
 	"syscall"
@@ -30,29 +39,96 @@ import (
  */
 
 func main() {
-	config.Load("workspace/")
-	// create instance ssh adapter:
-	_ssh := ssh.NewShhAdapter()
-	_server := server.NewServer()
-	_task := task.NewScheduler(_ssh)
+
+	config.Load("./")
+
+	console, err := logger.LogConfiguration(config.Config.Server.Logging)
+
+	if err != nil {
+		console.Error("error while initializing logger", zap.Error(err))
+		return
+	}
+
+	undo := zap.RedirectStdLog(console)
+
+	defer undo()
+
+	// create instance grpc client adapter:
+	grpcAdapter := grpcs.NewManagementGrpcService(console)
+	// create connection grpc client adapter:
+	grpcConnectionClient, err := grpcAdapter.GRPCConnectionClientManager()
+
+	if err != nil {
+		console.Error("error while initializing grpc connection client", zap.Error(err))
+		return
+	}
+
+	defer func(grpcConnectionClient *grpc.ClientConn) {
+		err := grpcConnectionClient.Close()
+		if err != nil {
+			console.Error("error while closing grpc connection client", zap.Error(err))
+		}
+	}(grpcConnectionClient)
+
+	// create instance validate request adapter:
+	validationInstance := validation.NewValidatorService(console)
+
+	// create instance http server adapter:
+	serverInstance := server.NewServer(console)
 
 	// Configura el manejo de señales.
-	stop := setupSignalHandler()
-	go _server.ListenAndServe(config.Config.Server.Port, stop)
+	stop := setupSignalHandler(console)
+
+	// go routine http server arg port, channel.
+	go serverInstance.ListenAndServe(config.Config.Server.Port, stop)
+
+	// create instance client grpc creator:
+	grpcClient := hservice.NewGrpcClientCreator()
+
+	// create instance client grpc service:
+	helloService := hservice.NewHelloService(console, grpcConnectionClient, grpcClient)
+
+	// create instance grpc command adapter:
+	commandAdapter := command.NewGrpcHelloCommand(console, &helloService)
+
+	// create instance rabbit adapter:
+	rabbitInstance := queue.NewMqAdapter(console)
+
+	// create instance manager connection rabbit:
+	rabbitConnection := rabbitmq.NewManagerConnection(rabbitInstance)
+
+	// create connection rabbit:
+	err = rabbitConnection.RabbitMqConnection()
+
+	if err != nil {
+		console.Error("error while initializing rabbitmq connection", zap.Error(err))
+		return
+	}
+
+	// create instance messages received:
+	messageInstance := messages.NewMessageAdapter(console, rabbitInstance, commandAdapter, validationInstance)
+
+	go messageInstance.ReceiveMessages(config.Config.Queue.Consumer)
+
+	// create instance ssh adapter:
+	sshInstance := ssh.NewShhAdapter(console, rabbitInstance)
+
+	// create instance scheduler adapter:
+	taskInstance := task.NewScheduler(sshInstance, console, rabbitInstance)
 
 	// Crear la tarea que se ejecutará cada 30 segundos
-	exec := _task.Create()
+	exec := taskInstance.Create()
 
-	log.Println("task is enable: ", config.Config.Scheduler.Enable)
+	console.Info("task is enable ", zap.Bool("enable", config.Config.Scheduler.Enable))
 	if config.Config.Scheduler.Enable {
-		_task.Run(exec)
+		taskInstance.Run(exec)
 	}
 
 	select {}
 }
 
 // SetupSignalHandler configura el manejo de señales para una parada controlada.
-func setupSignalHandler() (quitOs <-chan struct{}) {
+func setupSignalHandler(console *zap.Logger) (quitOs <-chan struct{}) {
 	quit := make(chan struct{})
 	// Canal para recibir señales del sistema
 	s := make(chan os.Signal, 1)
@@ -61,11 +137,11 @@ func setupSignalHandler() (quitOs <-chan struct{}) {
 	go func() {
 		// Espera la primera señal y cierra el canal `stop`.
 		next := <-s
-		log.Println("caught signal", next)
+		console.Info("caught signal next", zap.Any("signal", next))
 		close(quit)
 		// Espera una segunda señal para terminar inmediatamente.
 		next = <-s
-		log.Println("caught signal", next)
+		console.Info("caught signal next", zap.Any("signal", next))
 		os.Exit(1)
 	}()
 	return quit

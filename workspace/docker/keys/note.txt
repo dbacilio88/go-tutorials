@@ -1,1 +1,0 @@
-ssh-keygen -t rsa -b 4096 -C "dbacilio88@gmail.com" -f ./keys/id_rsa

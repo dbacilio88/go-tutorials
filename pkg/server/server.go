@@ -4,7 +4,8 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log"
+	proto "github.com/dbacilio88/go/proto/hello"
+	"go.uber.org/zap"
 	"net/http"
 	"time"
 )
@@ -29,46 +30,85 @@ import (
 
 type Executor interface {
 }
+
+// Server estructura que gestiona los servidores HTTP y gRPC
 type Server struct {
-	router *http.ServeMux
+	router  *http.ServeMux
+	console *zap.Logger
 }
 
-func NewServer() *Server {
+// gRPC grpcServer estructura
+type grpcServer struct {
+	proto.UnimplementedHelloServiceServer
+	console *zap.Logger
+}
+
+// NewServer crea una nueva instancia del servidor HTTP y gRPC
+func NewServer(console *zap.Logger) *Server {
 	return &Server{
-		router: http.NewServeMux(),
+		router:  http.NewServeMux(),
+		console: console,
 	}
 }
 
+// Hello Implementación del método Hello del servicio gRPC
+func (s *grpcServer) Hello(ctx context.Context, in *proto.HelloRequest) (*proto.HelloResponse, error) {
+	s.console.Info("Received hservice request", zap.String("name", in.GetHello().GetFirstName()))
+
+	tqr := in.GetHello()
+	prefix := tqr.GetPrefix()
+	firstName := tqr.GetFirstName()
+	message := "Hello " + prefix + ", " + firstName + " welcome"
+	response := &proto.HelloResponse{
+		CustomHello: message,
+	}
+	return response, nil
+}
+
+// handler para el servidor HTTP
 func handler(w http.ResponseWriter, r *http.Request) {
-	_, err := fmt.Fprintf(w, "Hello, World!")
+	_, err := fmt.Fprintf(w, "Hello, World! :P")
 	if err != nil {
 		return
 	}
 }
-func (s *Server) ListenAndServe(addr string, quit <-chan struct{}) {
+
+// startHttpServer Función para iniciar el servidor HTTP
+func (s *Server) startHttpServer(addr string) *http.Server {
 	http.HandleFunc("/", handler)
-	// Configura el servidor HTTP.
+
+	// Configurar y devolver el servidor HTTP
 	serv := &http.Server{
 		Addr:         addr,
 		WriteTimeout: time.Second * 15,
 	}
-	go func() {
+	return serv
+}
 
-		log.Println("start http server on", serv.Addr)
-		if err := serv.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
-			log.Fatalf("http server listen error: %v", err)
+// ListenAndServe Escuchar y servir tanto HTTP como gRPC
+func (s *Server) ListenAndServe(addr string, quit <-chan struct{}) {
+	// Iniciar servidor HTTP
+	httpServer := s.startHttpServer(addr)
+
+	go func() {
+		s.console.Info("start http server on", zap.String("addr", addr))
+		if err := httpServer.ListenAndServe(); err != nil && !errors.Is(err, http.ErrServerClosed) {
+			s.console.Error("http server listen error", zap.Error(err))
+			return
 		}
 	}()
+
 	// Esperar a recibir una señal
 	<-quit
-	log.Println("shutting down server...")
 
+	s.console.Info("shutting down server...")
 	// Establece un tiempo límite para la parada del servidor.
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*5)
 	defer cancel()
 	// Intenta cerrar el servidor de manera ordenada.
-	if err := serv.Shutdown(ctx); err != nil {
-		log.Fatalf("http server shutdown error: %v", err)
+	if err := httpServer.Shutdown(ctx); err != nil {
+		s.console.Error("HTTP server shutdown failed", zap.Error(err))
 	}
-	log.Println("server shutdown successfully")
+	//grpcServer.GracefulStop()
+	s.console.Info("Servers shutdown successfully")
 }

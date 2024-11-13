@@ -1,10 +1,12 @@
 package ssh
 
 import (
+	"fmt"
+	"github.com/dbacilio88/go/pkg/adapters/queue"
 	"github.com/dbacilio88/go/pkg/config"
+	"go.uber.org/zap"
 	client "golang.org/x/crypto/ssh"
 	"golang.org/x/crypto/ssh/knownhosts"
-	"log"
 	"net"
 	"os"
 )
@@ -39,16 +41,19 @@ type Executor interface {
 }
 
 type ShhAdapter struct {
+	console       *zap.Logger
+	rabbitAdapter queue.Executor
 }
 
-func NewShhAdapter() *ShhAdapter {
-	return &ShhAdapter{}
+func NewShhAdapter(console *zap.Logger, rabbitAdapter queue.Executor) *ShhAdapter {
+	return &ShhAdapter{
+		console:       console,
+		rabbitAdapter: rabbitAdapter,
+	}
 }
 
 func (s *ShhAdapter) Connection() (*client.Client, error) {
-	log.Println("connecting to server ssh")
-
-	log.Println(net.JoinHostPort(config.Config.Ssh.Host, config.Config.Ssh.Port))
+	s.console.Info("connecting to server ssh")
 
 	conn, err := client.Dial(
 		config.Config.Ssh.Protocol,
@@ -57,35 +62,35 @@ func (s *ShhAdapter) Connection() (*client.Client, error) {
 	) //Tema familiar urgente
 
 	if err != nil {
-		log.Fatalf("error connecting to server ssh: %v", err)
+		s.failOnError(err, "error connecting to server ssh")
 		return nil, err
 	}
-	log.Println("connected to server ssh")
+	s.console.Info("connected to server ssh")
 	return conn, nil
 }
 
 func (s *ShhAdapter) clientConfig(config *config.Ssh) *client.ClientConfig {
-	log.Println("load configuration properties ssh")
-	log.Println("connection ssh for private key enable: ", config.Enable)
+	s.console.Info("load configuration properties ssh")
+	s.console.Info("connection ssh for private key", zap.Bool("enable", config.Enable))
 	if config.Enable {
-		log.Println("connecting to server ssh ", config.KnownHosts)
+		s.console.Info("connecting to server ssh")
 		host, err := knownhosts.New(config.KnownHosts)
 
 		if err != nil {
-			log.Fatalf("could not load known hosts: %s", err)
+			s.failOnError(err, "could not load known hosts")
 			return nil
 		}
 
 		key, err := os.ReadFile(config.PrivateKey)
 
 		if err != nil {
-			log.Fatalf("unable to read private key: %v", err)
+			s.failOnError(err, "unable to read private key")
 			return nil
 		}
 		// Create the Signer for this private key.
 		private, err := client.ParsePrivateKey(key)
 		if err != nil {
-			log.Fatalf("unable to parse private key: %v", err)
+			s.failOnError(err, "unable to parse private key")
 			return nil
 		}
 		return &client.ClientConfig{
@@ -105,5 +110,12 @@ func (s *ShhAdapter) clientConfig(config *config.Ssh) *client.ClientConfig {
 			HostKeyCallback: client.InsecureIgnoreHostKey(),
 			Timeout:         0,
 		}
+	}
+}
+
+func (a *ShhAdapter) failOnError(err error, msg string) {
+	if err != nil {
+		fullMessage := fmt.Sprintf("%s: %s", msg, err.Error())
+		a.console.Error(fullMessage, zap.Error(err))
 	}
 }

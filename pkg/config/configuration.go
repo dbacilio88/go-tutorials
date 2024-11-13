@@ -2,6 +2,7 @@ package config
 
 import (
 	"errors"
+	"fmt"
 	"github.com/spf13/viper"
 	"log"
 )
@@ -52,19 +53,26 @@ func Load(path string) {
 	}
 
 	log.Println("Successfully loaded config")
-
 }
 
 type Configurations struct {
 	Server    Server    `mapstructure:"server" yaml:"server"`
 	Ssh       Ssh       `mapstructure:"ssh" yaml:"ssh"`
 	Scheduler Scheduler `mapstructure:"scheduler" yaml:"scheduler"`
+	Database  Database  `mapstructure:"database" yaml:"database"`
+	Rabbitmq  Rabbitmq  `mapstructure:"rabbitmq" yaml:"rabbitmq"`
+	Queue     Queue     `mapstructure:"queue" yaml:"queue"`
+	Grpc      Grpc      `mapstructure:"grpc" yaml:"grpc"`
 }
 
 // Server use mapstructure in document github.com/go-viper/mapstructure/v2
 type Server struct {
-	Host string `mapstructure:"host" yaml:"host"`
-	Port string `mapstructure:"port" yaml:"port"`
+	Host        string `mapstructure:"host" yaml:"host"`
+	Port        string `mapstructure:"port" yaml:"port"`
+	Name        string `mapstructure:"name" yaml:"name"`
+	Timeout     int    `mapstructure:"timeout" yaml:"timeout"`
+	Logging     string `mapstructure:"logging" yaml:"logging"`
+	Environment string `mapstructure:"environment" yaml:"environment"`
 }
 
 type Ssh struct {
@@ -82,4 +90,43 @@ type Ssh struct {
 
 type Scheduler struct {
 	Enable bool `mapstructure:"enable" yaml:"enable"`
+}
+
+type Database struct {
+	Host     string `mapstructure:"host" yaml:"host"`
+	Port     string `mapstructure:"port" yaml:"port"`
+	User     string `mapstructure:"user" yaml:"user"`
+	Password string `mapstructure:"password" yaml:"password"`
+	Dbname   string `mapstructure:"dbname" yaml:"dbname"`
+}
+
+type Rabbitmq struct {
+	Host     string `mapstructure:"host" yaml:"host"`
+	Port     string `mapstructure:"port" yaml:"port"`
+	User     string `mapstructure:"user" yaml:"user"`
+	Password string `mapstructure:"password" yaml:"password"`
+	Vhost    string `mapstructure:"vhost" yaml:"vhost"`
+	Protocol string `mapstructure:"protocol" yaml:"protocol"`
+}
+
+type Queue struct {
+	Consumer string `mapstructure:"consumer" yaml:"consumer"`
+	Producer string `mapstructure:"producer" yaml:"producer"`
+}
+
+type Grpc struct {
+	Server   string `mapstructure:"server" yaml:"server"`
+	Client   string `mapstructure:"client" yaml:"client"`
+	Protocol string `mapstructure:"protocol" yaml:"protocol"`
+	Cert     string `mapstructure:"cert" yaml:"cert"`
+	Key      string `mapstructure:"key" yaml:"key"`
+}
+
+func GetDomainRabbitConnection() string {
+	return fmt.Sprintf("%s://%s:%s@%s:%s/",
+		Config.Rabbitmq.Protocol,
+		Config.Rabbitmq.User,
+		Config.Rabbitmq.Password,
+		Config.Rabbitmq.Host,
+		Config.Rabbitmq.Port)
 }

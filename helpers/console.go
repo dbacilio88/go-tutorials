@@ -1,10 +1,10 @@
-package mq
+package helpers
 
 /**
 *
-* rabbitmq
+* console
 * <p>
-* rabbitmq file
+* console file
 *
 * Copyright (c) 2024 All rights reserved.
 *
@@ -14,14 +14,6 @@ package mq
 *
 * @author bxcode
 * @author dbacilio88@outlook.es
-* @since 17/08/2024
+* @since 8/11/2024
 *
  */
-
-type Executor interface{}
-type RabbitMqAdapter struct {
-}
-
-func NewRabbitMqAdapter() *RabbitMqAdapter {
-	return &RabbitMqAdapter{}
-}
