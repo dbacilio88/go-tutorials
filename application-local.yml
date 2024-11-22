@@ -1,0 +1,47 @@
+server:
+  port: :3000
+  host: localhost
+  name: go
+  timeout: 30
+  logging: info
+  environment: prod
+
+ssh:
+  host: localhost
+  password: cbaciliod
+  port: 2222
+  protocol: tcp
+  username: cbaciliod
+  private_key: pkg/adapters/ssh/workspace/docker/keys/id_rsa
+  public_key: pkg/adapters/ssh/workspace/docker/keys/id_rsa.pub
+  known_hosts: pkg/adapters/ssh/workspace/docker/keys/known_hosts
+  enable: false
+
+scheduler:
+  enable: true
+
+database:
+  host: localhost
+  port: 5432
+  user: username
+  password: l1dEtYRuPSMYfm3r
+  dbname: database
+
+rabbitmq:
+  host: localhost
+  port: 5672
+  user: guest
+  password: guest
+  vhost: /
+  protocol: amqp
+
+queue:
+  consumer: "QU-APP-CONSUMER"
+  producer: "QU-APP-PRODUCER"
+
+grpc:
+  server: localhost:9091
+  client: localhost:9092
+  protocol: tcp
+  cert: ./workspace/ssl/server.crt
+  key: ./workspace/ssl/server.pem

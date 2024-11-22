@@ -30,7 +30,7 @@ var Config Configurations
 func Load(path string) {
 	viper.SetConfigName("application")
 	viper.AddConfigPath(path)
-	viper.SetConfigType("json")
+	viper.SetConfigType("yml")
 	viper.AutomaticEnv()
 	if err := viper.ReadInConfig(); err != nil {
 		var file viper.ConfigFileNotFoundError
