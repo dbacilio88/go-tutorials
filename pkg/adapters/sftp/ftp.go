@@ -25,7 +25,7 @@ import (
 * distributed, modified, or used in any form without the express written
 * permission of the copyright owner.
 *
-* @author bxcode
+* @author christian
 * @author dbacilio88@outlook.es
 * @since 4/08/2024
 *
@@ -147,9 +147,9 @@ func (s *FtpAdapter) CreateDir(conn *sftp.Client, root string) error {
 	return nil
 }
 
-func (a *FtpAdapter) failOnError(err error, msg string) {
+func (s *FtpAdapter) failOnError(err error, msg string) {
 	if err != nil {
 		fullMessage := fmt.Sprintf("%s: %s", msg, err.Error())
-		a.console.Error(fullMessage, zap.Error(err))
+		s.console.Error(fullMessage, zap.Error(err))
 	}
 }

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"github.com/spf13/viper"
 	"log"
+	"os"
 )
 
 /**
@@ -19,7 +20,7 @@ import (
 * distributed, modified, or used in any form without the express written
 * permission of the copyright owner.
 *
-* @author bxcode
+* @author christian
 * @author dbacilio88@outlook.es
 * @since 3/08/2024
 *
@@ -27,10 +28,17 @@ import (
 
 var Config Configurations
 
-func Load(path string) {
+func Load() {
+	path := os.Getenv("CONFIG_PATH")
+	if path == "" {
+		log.Fatal("La variable de entorno CONFIG_PATH no está definida")
+	}
+
 	viper.SetConfigName("application")
 	viper.AddConfigPath(path)
 	viper.SetConfigType("yml")
+	// Si se desea pasar el archivo por variable de entorno:
+	//viper.SetConfigFile(path)
 	viper.AutomaticEnv()
 	if err := viper.ReadInConfig(); err != nil {
 		var file viper.ConfigFileNotFoundError

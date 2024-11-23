@@ -14,12 +14,12 @@ queue:
     consumer: QU-APP-CONSUMER
     producer: QU-APP-PRODUCER
 rabbitmq:
-    host: chimpanzee.rmq.cloudamqp.com
-    password: F6-m21vrQokbdCys_upLFsH2X2kfxl2J
-    port: 1883
+    host: localhost
+    password: password
+    port: 5671
     protocol: amqp
-    user: kjsycjee
-    vhost: kjsycjee
+    user: guest
+    vhost: guest
 scheduler:
     enable: true
 server:

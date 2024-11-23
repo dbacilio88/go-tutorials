@@ -14,7 +14,7 @@ import "github.com/jackc/pgx/v5/pgxpool"
 * distributed, modified, or used in any form without the express written
 * permission of the copyright owner.
 *
-* @author bxcode
+* @author christian
 * @author dbacilio88@outlook.es
 * @since 5/08/2024
 *

@@ -21,7 +21,7 @@ import (
 * distributed, modified, or used in any form without the express written
 * permission of the copyright owner.
 *
-* @author bxcode
+* @author christian
 * @author dbacilio88@outlook.es
 * @since 9/11/2024
 *

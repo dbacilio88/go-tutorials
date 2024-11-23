@@ -1,9 +1,12 @@
 package task
 
 import (
+	"encoding/json"
+	"fmt"
 	"github.com/dbacilio88/go/pkg/adapters/queue"
 	"github.com/dbacilio88/go/pkg/adapters/sftp"
 	"github.com/dbacilio88/go/pkg/adapters/ssh"
+	"github.com/dbacilio88/go/pkg/config"
 	"github.com/madflojo/tasks"
 	"go.uber.org/zap"
 	client "golang.org/x/crypto/ssh"
@@ -22,7 +25,7 @@ import (
 * distributed, modified, or used in any form without the express written
 * permission of the copyright owner.
 *
-* @author bxcode
+* @author christian
 * @author dbacilio88@outlook.es
 * @since 4/08/2024
 *
@@ -53,11 +56,11 @@ func (s *Scheduler) Create() *tasks.Scheduler {
 func (s *Scheduler) Run(exec *tasks.Scheduler) {
 	s.console.Info("run task")
 	task := &tasks.Task{
-		Interval:          10 * time.Minute,
+		Interval:          3 * time.Minute,
 		RunOnce:           false,
 		RunSingleInstance: false,
 		TaskFunc: func() error {
-			s.console.Info("run task for 1 minutes")
+			s.console.Info("run task for 3 minutes")
 			con, err := s.ssh.Connection()
 			if err != nil {
 				s.console.Fatal("ssh connection error", zap.Error(err))
@@ -79,7 +82,17 @@ func (s *Scheduler) Run(exec *tasks.Scheduler) {
 			return nil
 		},
 		ErrFunc: func(err error) {
-			s.console.Fatal("task err", zap.Error(err))
+			s.console.Error("task err", zap.Error(err))
+			data, err := json.Marshal(err)
+			if err != nil {
+				s.failOnError(err, "failed to marshal data directory")
+				return
+			}
+			err = s.rabbitAdapter.SendMessage(config.Config.Queue.Producer, data)
+			if err != nil {
+				s.failOnError(err, "failed to send message")
+				return
+			}
 		},
 	}
 
@@ -89,5 +102,12 @@ func (s *Scheduler) Run(exec *tasks.Scheduler) {
 		return
 	} else {
 		s.console.Info("add task success", zap.String("add", add))
+	}
+}
+
+func (s *Scheduler) failOnError(err error, msg string) {
+	if err != nil {
+		fullMessage := fmt.Sprintf("%s: %s", msg, err.Error())
+		s.console.Error(fullMessage, zap.Error(err))
 	}
 }

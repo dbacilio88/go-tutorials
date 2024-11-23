@@ -23,7 +23,7 @@ import (
 * distributed, modified, or used in any form without the express written
 * permission of the copyright owner.
 *
-* @author bxcode
+* @author christian
 * @author dbacilio88@outlook.es
 * @since 3/08/2024
 *
@@ -59,7 +59,7 @@ func (s *ShhAdapter) Connection() (*client.Client, error) {
 		config.Config.Ssh.Protocol,
 		net.JoinHostPort(config.Config.Ssh.Host, config.Config.Ssh.Port),
 		s.clientConfig(&config.Config.Ssh),
-	) //Tema familiar urgente
+	)
 
 	if err != nil {
 		s.failOnError(err, "error connecting to server ssh")
@@ -73,9 +73,7 @@ func (s *ShhAdapter) clientConfig(config *config.Ssh) *client.ClientConfig {
 	s.console.Info("load configuration properties ssh")
 	s.console.Info("connection ssh for private key", zap.Bool("enable", config.Enable))
 	if config.Enable {
-		s.console.Info("connecting to server ssh")
 		host, err := knownhosts.New(config.KnownHosts)
-
 		if err != nil {
 			s.failOnError(err, "could not load known hosts")
 			return nil
@@ -113,9 +111,9 @@ func (s *ShhAdapter) clientConfig(config *config.Ssh) *client.ClientConfig {
 	}
 }
 
-func (a *ShhAdapter) failOnError(err error, msg string) {
+func (s *ShhAdapter) failOnError(err error, msg string) {
 	if err != nil {
 		fullMessage := fmt.Sprintf("%s: %s", msg, err.Error())
-		a.console.Error(fullMessage, zap.Error(err))
+		s.console.Error(fullMessage, zap.Error(err))
 	}
 }
